@@ -1,6 +1,7 @@
 #include "web_api.h"
 #include "emscripten/emscripten.h"
 #include "output.h"
+#include <emscripten/em_asm.h>
 
 using namespace Web_API;
 
@@ -102,6 +103,13 @@ bool Web_API::ShouldConnectPlayer(std::string_view uuid) {
 	int result = EM_ASM_INT({
 		return shouldConnectPlayer(UTF8ToString($0, $1)) ? 1 : 0;
 	}, uuid.data(), uuid.size());
+	return result == 1;
+}
+
+bool Web_API::ShouldSyncGameEvent(int ev_id) {
+	int result = EM_ASM_INT({
+		return shouldSyncGameEvent(ev_id);
+	}, ev_id);
 	return result == 1;
 }
 

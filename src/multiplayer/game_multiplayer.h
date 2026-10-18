@@ -103,6 +103,17 @@ public:
 	int cu_temperature;
 	int cu_precipitation;
 
+	// npc-sync
+	void EventMoved(int ev_id, int x, int y);
+	void EventFacingChanged(int ev_id, int dir);
+	void EventChangedMoveSpeed(int ev_id, int spd);
+	void EventChangedSpriteGraphic(int ev_id, std::string name, int index);
+	//void EventJumped(int ev_id, int x, int y);
+	//void EventFlashed(int ev_id, int r, int g, int b, int p, int f);
+	void EventChangedTransparency(int ev_id, int transparency);
+	void EventChangedSpriteHidden(int ev_id, bool hidden);
+	void EventActiveChanged(int ev_id, bool active);
+
 	void SpawnOtherPlayer(int id);
 	void SyncPlayerFlash();
 	void ResetRepeatingFlash();

@@ -58,6 +58,12 @@ public:
 	/** @{ */
 	Drawable::Z_t GetScreenZ(int x_offset, int y_offset) const override;
 	bool Move(int dir) override;
+	// npc-sync
+	void SetFacing(int new_facing);
+	void SetMoveSpeed(int speed);
+	void SetSpriteGraphic(std::string sprite_name, int index);
+	void SetTransparency(int value);
+	void SetSpriteHidden(bool hidden);
 	void UpdateNextMovementAction() override;
 	bool IsVisible() const override;
 	/** @} */

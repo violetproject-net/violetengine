@@ -26,6 +26,8 @@ namespace Web_API {
 
 	bool ShouldConnectPlayer(std::string_view uuid);
 
+	bool ShouldSyncGameEvent(int ev_id);
+
 	void OnRequestFile(std::string_view path);
 }
 

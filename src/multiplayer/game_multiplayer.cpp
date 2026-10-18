@@ -581,6 +581,50 @@ void Game_Multiplayer::MainPlayerFlashed(int r, int g, int b, int p, int f) {
 	flash_this_frame = true;
 }
 
+// npc-sync
+// TODO: event flashing
+void Game_Multiplayer::EventMoved(int ev_id, int x, int y) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
+void Game_Multiplayer::EventFacingChanged(int ev_id, int dir) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
+void Game_Multiplayer::EventChangedMoveSpeed(int ev_id, int spd) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
+void Game_Multiplayer::EventChangedSpriteGraphic(int ev_id, std::string name, int index) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
+void Game_Multiplayer::EventChangedSpriteHidden(int ev_id, bool hidden) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
+void Game_Multiplayer::EventChangedTransparency(int ev_id, int transparency) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
+void Game_Multiplayer::EventActiveChanged(int ev_id, bool active) {
+	if(!Web_API::ShouldSyncGameEvent(ev_id))
+		return;
+	// STUB
+}
+
 void Game_Multiplayer::SyncPlayerFlash() {
 	// a parallel page ending in "Wait 0.0" runs its flash on every other frame
 	constexpr int max_repeating_flash_gap = 2;

@@ -520,6 +520,7 @@ void Game_Multiplayer::Initialize() {
 	}
 
 	players.clear();
+	event_mvqs.clear();
 	sync_switches.clear();
 	sync_vars.clear();
 	sync_events.clear();

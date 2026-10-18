@@ -1,13 +1,16 @@
 #ifndef EP_GAME_MULTIPLAYER_H
 #define EP_GAME_MULTIPLAYER_H
 
+#include <deque>
 #include <string>
 #include <bitset>
+#include <unordered_map>
 #include <unordered_set>
 #include "../string_view.h"
 #include "../game_pictures.h"
 #include "../tone.h"
 #include <lcf/rpg/sound.h>
+#include <utility>
 #include "yno_connection.h"
 
 class PlayerOther;
@@ -104,6 +107,7 @@ public:
 	int cu_precipitation;
 
 	// npc-sync
+	std::unordered_map<int, std::deque<std::pair<int, int>>> event_mvqs;
 	void EventMoved(int ev_id, int x, int y);
 	void EventFacingChanged(int ev_id, int dir);
 	void EventChangedMoveSpeed(int ev_id, int spd);

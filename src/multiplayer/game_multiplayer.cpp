@@ -37,6 +37,8 @@
 #include "../cache.h"
 #include "chatname.h"
 #include "drawable_list.h"
+#include "game_character.h"
+#include "game_event.h"
 #include "main_data.h"
 #include "playerother.h"
 #include "web_api.h"
@@ -80,12 +82,12 @@ void Game_Multiplayer::SpawnOtherPlayer(int id) {
 
 // this assumes that the player is stopped
 // return true if player moves normally, false if players teleports
-static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
-	if (!player.IsStopping()) {
-		Output::Error("MovePlayerToPos unexpected error: the player is busy being animated");
+static bool MoveCharacterToPos(Game_Character& character, int x, int y, bool instant) {
+	if (!character.IsStopping()) {
+		Output::Error("MovePlayerToPos unexpected error: the character is busy being animated");
 	}
-	int dx = x - player.GetX();
-	int dy = y - player.GetY();
+	int dx = x - character.GetX();
+	int dy = y - character.GetY();
 	int adx = abs(dx);
 	int ady = abs(dy);
 	if (Game_Map::LoopHorizontal() && adx == Game_Map::GetTilesX() - 1) {
@@ -96,9 +98,9 @@ static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
 		dy = dy > 0 ? -1 : 1;
 		ady = 1;
 	}
-	if (adx > 1 || ady > 1 || (dx == 0 && dy == 0) || !player.IsMultiplayerVisible()) {
-		player.SetX(x);
-		player.SetY(y);
+	if (adx > 1 || ady > 1 || (dx == 0 && dy == 0) || instant) {
+		character.SetX(x);
+		character.SetY(y);
 		return false;
 	}
 	using D = Game_Character::Direction;
@@ -107,8 +109,16 @@ static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
 		{D::Left,     0,       D::Right},
 		{D::DownLeft, D::Down, D::DownRight},
 	};
-	player.Move(dir[dy+1][dx+1]);
+	character.Move(dir[dy+1][dx+1]);
 	return true;
+}
+
+static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
+	return MoveCharacterToPos(player, x, y, !player.IsMultiplayerVisible());
+}
+
+static bool MoveEventToPos(Game_Event& event, int x, int y) {
+	return MoveCharacterToPos(event, x, y, false);
 }
 
 void Game_Multiplayer::ResetRepeatingFlash() {
@@ -945,6 +955,29 @@ void Game_Multiplayer::Update() {
 					}
 				}
 				p.second.chat_name->SetTransparent(overlap);
+			}
+		}
+
+		// npc-sync
+		for (auto& [ev_id, ev_mvq] : event_mvqs) {
+			Game_Event* ev = Game_Map::GetEvent(ev_id);
+			if (ev == nullptr) {
+				// TODO erase from map
+				continue;
+			}
+			
+			if (ev_mvq.size() > settings.moving_queue_limit) {
+				ev_mvq.erase(
+					ev_mvq.begin(),
+					std::next(ev_mvq.begin(), ev_mvq.size() - settings.moving_queue_limit)
+				);
+			}
+
+			if (!ev_mvq.empty() && ev->IsStopping()) {
+				auto [x, y] = ev_mvq.front();
+
+				MoveEventToPos(*ev, x, y);
+				ev_mvq.pop_front();
 			}
 		}
 

@@ -64,6 +64,14 @@ namespace S2C {
 		const int id;
 	};
 
+	// npc-sync
+	// this is an event for controlling game events in the map, not common events, and stuff like that
+	class EventPacket : public S2CPacket {
+	public:
+		EventPacket(std::string_view _id) : id(Decode<int>(_id)) {}
+		const int id;
+	};
+
 	class ConnectPacket : public PlayerPacket {
 	public:
 		ConnectPacket(const PL& v)
@@ -397,6 +405,77 @@ namespace S2C {
 			 	precipitation(stoi((std::string) v.at(1))) {}
 		int temperature;
 		int precipitation;
+	};
+
+
+	/* Violetproject */
+
+	class EventMovePacket : public EventPacket {
+	public:
+		EventMovePacket(const PL& v)
+			: EventPacket(v.at(0)),
+			x(Decode<int>(v.at(1))),
+			y(Decode<int>(v.at(2))) {}
+		const int x, y;
+	};
+
+	class EventJumpPacket : public EventPacket {
+	public:
+		EventJumpPacket(const PL& v)
+			: EventPacket(v.at(0)),
+			x(Decode<int>(v.at(1))),
+			y(Decode<int>(v.at(2))) {}
+		const int x, y;
+	};
+
+	class EventFacingPacket : public EventPacket {
+	public:
+		EventFacingPacket(const PL& v)
+			: EventPacket(v.at(0)),
+			facing(Decode<int>(v.at(1))) {}
+		const int facing;
+	};
+
+	class EventSpeedPacket : public EventPacket {
+	public:
+		EventSpeedPacket(const PL& v)
+			: EventPacket(v.at(0)),
+			speed(Decode<int>(v.at(1))) {}
+		const int speed;
+	};
+
+	class EventSpritePacket : public EventPacket {
+	public:
+		EventSpritePacket(const PL& v)
+			: EventPacket(v.at(0)),
+			name(v.at(1)),
+			index(Decode<int>(v.at(2))) {}
+		const std::string name;
+		const int index;
+	};
+
+	class EventTransparencyPacket : public EventPacket {
+	public:
+		EventTransparencyPacket(const PL& v)
+			: EventPacket(v.at(0)),
+			transparency(Decode<int>(v.at(1))) {}
+		const int transparency;
+	};
+
+	class EventHiddenPacket : public EventPacket {
+	public:
+		EventHiddenPacket(const PL& v)
+			: EventPacket(v.at(0)),
+			hidden_bin(Decode<int>(v.at(1))) {}
+		const int hidden_bin;
+	};
+
+	class EventActivePacket : public EventPacket {
+	public:
+		EventActivePacket(const PL& v)
+			: EventPacket(v.at(0)),
+			active_bin(Decode<int>(v.at(1))) {}
+		const int active_bin;
 	};
 }
 namespace C2S {

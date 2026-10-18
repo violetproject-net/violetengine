@@ -18,8 +18,11 @@
 #ifndef EP_EMSCRIPTEN_INTERFACE_H
 #define EP_EMSCRIPTEN_INTERFACE_H
 
+#include <emscripten/val.h>
 #include <string>
 #include <array>
+
+using emscripten::val;
 
 class Emscripten_Interface {
 public:
@@ -29,6 +32,7 @@ public:
     static void UploadFont();
     static void RefreshScene();
 	static void TakeScreenshot(bool is_auto_screenshot = false);
+	static val GetScreenshot();
 	static void Reset();
 
 	static std::array<int, 2> GetPlayerCoords();

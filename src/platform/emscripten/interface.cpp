@@ -19,6 +19,7 @@
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <emscripten/em_asm.h>
 #include <lcf/lsd/reader.h>
 #include <sstream>
 
@@ -37,6 +38,8 @@
 #include "../../game_player.h"
 #include "../../audio.h"
 #include "../../web_api.h"
+
+using emscripten::val;
 
 void Emscripten_Interface::Reset() {
 	Player::reset_flag = true;
@@ -93,6 +96,23 @@ void Emscripten_Interface::TakeScreenshot(bool is_auto_screenshot) {
 	EM_ASM_ARGS({
 		Module.api_private.download_js($0, $1, $2);
 	}, screenshot.data(), screenshot.size(), filename.c_str());
+}
+
+val Emscripten_Interface::GetScreenshot() {
+	static int index = 0;
+	std::ostringstream os;
+	Output::TakeScreenshot(os);
+	std::string screenshot = os.str();
+
+	val data = val::global("Uint8Array").new_(screenshot.size());
+	data.call<void>(
+		"set",
+		val(emscripten::typed_memory_view(
+			screenshot.size(),
+			reinterpret_cast<const unsigned char*>(screenshot.data())
+		))
+	);
+	return data;
 }
 
 bool Emscripten_Interface_Private::UploadSavegameStep2(int slot, int buffer_addr, int size) {
@@ -260,7 +280,8 @@ EMSCRIPTEN_BINDINGS(player_interface) {
 #endif
 		.class_function("refreshScene", &Emscripten_Interface::RefreshScene)
 		.class_function("takeScreenshot", &Emscripten_Interface::TakeScreenshot)
-
+		
+		.class_function("getScreenshot", &Emscripten_Interface::GetScreenshot)
 		.class_function("getPlayerCoords", &Emscripten_Interface::GetPlayerCoords)
 		.class_function("setLanguage", &Emscripten_Interface::SetLanguage, emscripten::allow_raw_pointers())
 		.class_function("sessionReady", &Emscripten_Interface::SessionReady)

@@ -429,6 +429,11 @@ void Game_Event::SetSpriteHidden(bool hidden) {
 	GMI().EventChangedSpriteHidden(GetId(), hidden);
 }
 
+void Game_Event::SetActive(bool active) {
+	Game_Character::SetActive(active);
+	GMI().EventActiveChanged(GetId(), active);
+}
+
 void Game_Event::UpdateNextMovementAction() {
 	if (!page) {
 		return;

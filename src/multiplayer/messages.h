@@ -408,7 +408,7 @@ namespace S2C {
 	};
 
 
-	/* Violetproject */
+	/* ANCHOR - Violetproject: S2C messages */
 
 	class EventMovePacket : public EventPacket {
 	public:
@@ -717,6 +717,90 @@ namespace C2S {
 		int action_bin;
 	};
 
+	/* ANCHOR - Violetproject: S2C message codec */
+
+	class EventMovePacket : public C2SPacket {
+	public:
+		EventMovePacket(int _ev_id, int _x, int _y) : C2SPacket("evm"),
+			ev_id(_ev_id), x(_x), y(_y) {}
+		std::string ToBytes() const override { return Build(x, y); }
+	protected:
+		int ev_id, x, y;
+	};
+
+	class EventTeleportPacket : public C2SPacket {
+	public:
+		EventTeleportPacket(int _ev_id, int _x, int _y) : C2SPacket("evtp"),
+			ev_id(_ev_id), x(_x), y(_y) {}
+		std::string ToBytes() const override { return Build(x, y); }
+	protected:
+		int ev_id, x, y;
+	};
+
+	class EventJumpPacket : public C2SPacket {
+	public:
+		EventJumpPacket(int _ev_id, int _x, int _y) : C2SPacket("evjmp"),
+			x(_x), y(_y) {}
+		std::string ToBytes() const override { return Build(x, y); }
+	protected:
+		int ev_id, x, y;
+	};
+
+	class EventFacingPacket : public C2SPacket {
+	public:
+		EventFacingPacket(int _ev_id, int _d) : C2SPacket("evf"), 
+			ev_id(_ev_id), d(_d) {}
+		std::string ToBytes() const override { return Build(d); }
+	protected:
+		int ev_id, d;
+	};
+
+	class EventSpeedPacket : public C2SPacket {
+	public:
+		EventSpeedPacket(int _ev_id, int _spd) : C2SPacket("evspd"), 
+			ev_id(_ev_id), spd(_spd) {}
+		std::string ToBytes() const override { return Build(spd); }
+	protected:
+		int ev_id, spd;
+	};
+
+	class EventSpritePacket : public C2SPacket {
+	public:
+		EventSpritePacket(int _ev_id, std::string _n, int _i) : C2SPacket("evspr"),
+			ev_id(_ev_id), name(_n), index(_i) {}
+		std::string ToBytes() const override { return Build(name, index); }
+	protected:
+		int ev_id;
+		std::string name;
+		int index;
+	};
+
+	class EventTransparencyPacket : public C2SPacket {
+	public:
+		EventTransparencyPacket(int _ev_id, int _transparency) : C2SPacket("evtr"),
+			ev_id(_ev_id), transparency(_transparency) {}
+		std::string ToBytes() const override { return Build(transparency); }
+	protected:
+		int ev_id, transparency;
+	};
+
+	class EventHiddenPacket : public C2SPacket {
+	public:
+		EventHiddenPacket(int _ev_id, int _hidden_bin) : C2SPacket("evh"),
+			ev_id(_ev_id), hidden_bin(_hidden_bin) {}
+		std::string ToBytes() const override { return Build(hidden_bin); }
+	protected:
+		int ev_id, hidden_bin;
+	};
+
+	class EventActivePacket : public C2SPacket {
+	public:
+		EventActivePacket(int _ev_id, int _active_bin) : C2SPacket("eva"),
+			ev_id(_ev_id), active_bin(_active_bin) {}
+		std::string ToBytes() const override { return Build(active_bin); }
+	protected:
+		int ev_id, active_bin;
+	};
 }
 }
 

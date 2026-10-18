@@ -597,43 +597,43 @@ void Game_Multiplayer::MainPlayerFlashed(int r, int g, int b, int p, int f) {
 void Game_Multiplayer::EventMoved(int ev_id, int x, int y) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventMovePacket>(ev_id, x, y);
 }
 
 void Game_Multiplayer::EventFacingChanged(int ev_id, int dir) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventFacingPacket>(ev_id, dir);
 }
 
 void Game_Multiplayer::EventChangedMoveSpeed(int ev_id, int spd) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventSpeedPacket>(ev_id, spd);
 }
 
 void Game_Multiplayer::EventChangedSpriteGraphic(int ev_id, std::string name, int index) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventSpritePacket>(ev_id, name, index);
 }
 
 void Game_Multiplayer::EventChangedSpriteHidden(int ev_id, bool hidden) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventHiddenPacket>(ev_id, hidden);
 }
 
 void Game_Multiplayer::EventChangedTransparency(int ev_id, int transparency) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventTransparencyPacket>(ev_id, transparency);
 }
 
 void Game_Multiplayer::EventActiveChanged(int ev_id, bool active) {
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
-	// STUB
+	connection.SendPacketAsync<EventActivePacket>(ev_id, active);
 }
 
 void Game_Multiplayer::SyncPlayerFlash() {

@@ -64,6 +64,7 @@ public:
 	void SetSpriteGraphic(std::string sprite_name, int index);
 	void SetTransparency(int value);
 	void SetSpriteHidden(bool hidden);
+	void SetActive(bool active);
 	void UpdateNextMovementAction() override;
 	bool IsVisible() const override;
 	/** @} */

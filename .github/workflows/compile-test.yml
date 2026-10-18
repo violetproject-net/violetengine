@@ -29,9 +29,9 @@ jobs:
             build-essential cmake ninja-build git ca-certificates ccache
           sudo pip3 install meson
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Checkout buildscripts
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: EasyRPG/buildscripts
           path: buildscripts

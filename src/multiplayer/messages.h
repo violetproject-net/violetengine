@@ -410,6 +410,13 @@ namespace S2C {
 
 	/* ANCHOR - Violetproject: S2C messages */
 
+	class EventAuthorityPacket : public S2CPacket {
+	public:
+		EventAuthorityPacket(const PL& v)
+			: authority_host_id(Decode<int>(v.at(0))) {}
+		int authority_host_id;
+	};
+
 	class EventMovePacket : public EventPacket {
 	public:
 		EventMovePacket(const PL& v)
@@ -717,7 +724,7 @@ namespace C2S {
 		int action_bin;
 	};
 
-	/* ANCHOR - Violetproject: S2C message codec */
+	/* ANCHOR - Violetproject: C2S messages */
 
 	class EventMovePacket : public C2SPacket {
 	public:

@@ -266,6 +266,10 @@ void Emscripten_Interface::SaveConfig() {
 	Scene_Settings::SaveConfig(true);
 }
 
+void Emscripten_Interface::SetEventSyncEnabled(bool enabled) {
+	GMI().do_event_sync = enabled;
+}
+
 // Binding code
 EMSCRIPTEN_BINDINGS(player_interface) {
 	emscripten::class_<Emscripten_Interface>("api")
@@ -294,6 +298,8 @@ EMSCRIPTEN_BINDINGS(player_interface) {
 		.class_function("resetCanvas", &Emscripten_Interface::ResetCanvas)
 		.class_function("preloadFile", &Emscripten_Interface::PreloadFile, emscripten::allow_raw_pointers())
 		.class_function("saveConfig", &Emscripten_Interface::SaveConfig)
+
+		.class_function("setEventSyncEnabled", &Emscripten_Interface::SetEventSyncEnabled)
 	;
 
 	emscripten::class_<Emscripten_Interface_Private>("api_private")

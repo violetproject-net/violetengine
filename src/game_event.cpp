@@ -450,6 +450,7 @@ void Game_Event::UpdateNextMovementAction() {
 	CheckEventCollision();
 
 	if (!page
+			|| (GMI().do_event_sync && !GMI().has_event_authority)
 			|| IsPaused()
 			|| IsMoveRouteOverwritten()
 			|| IsStopCountActive()

@@ -480,6 +480,101 @@ void Game_Multiplayer::InitConnection() {
 
 		Web_API::OnPlayerNameUpdated(p.name, p.id);
 	});
+
+
+
+	/* ANCHOR - Violetproject: S2C Handlers */
+
+	connection.RegisterHandler<EventAuthorityPacket>("evauth", [this] (EventAuthorityPacket& p) {
+		has_event_authority = p.authority_host_id == host_id;
+		Web_API::EventAuthorityUpdated(p.authority_host_id);
+	});
+
+	// TODO - event flashing
+	
+	connection.RegisterHandler<EventMovePacket>("evm", [this] (EventMovePacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		int x = Utils::Clamp(p.x, 0, Game_Map::GetTilesX() - 1);
+		int y = Utils::Clamp(p.y, 0, Game_Map::GetTilesY() - 1);
+		event_mvqs[p.id].emplace_back(x, y);
+	});
+	connection.RegisterHandler<EventJumpPacket>("evjmp", [this] (EventJumpPacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		int x = Utils::Clamp(p.x, 0, Game_Map::GetTilesX() - 1);
+		int y = Utils::Clamp(p.y, 0, Game_Map::GetTilesY() - 1);
+		auto rc = ev->Jump(x, y);
+		if (rc) {
+			ev->SetMaxStopCount(ev->GetMaxStopCountForStep(ev->GetMoveFrequency()));
+		}
+	});
+	connection.RegisterHandler<EventFacingPacket>("evf", [this] (EventFacingPacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		int facing = Utils::Clamp(p.facing, 0, 3);
+		ev->SetFacing(facing);
+	});
+	connection.RegisterHandler<EventSpeedPacket>("evspd", [this] (EventSpeedPacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		int speed = Utils::Clamp(p.speed, 1, 6);
+		ev->SetMoveSpeed(speed);
+	});
+	connection.RegisterHandler<EventSpritePacket>("evspr", [this] (EventSpritePacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		int idx = Utils::Clamp(p.index, 0, 7);
+		ev->SetSpriteGraphic(std::string(p.name), idx);
+	});
+	connection.RegisterHandler<EventTransparencyPacket>("evtr", [this] (EventTransparencyPacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		int transparency = Utils::Clamp(p.transparency, 0, 7);
+		ev->SetTransparency(transparency);
+	});
+	connection.RegisterHandler<EventHiddenPacket>("evh", [this] (EventHiddenPacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		ev->SetSpriteHidden(p.hidden_bin == 1);
+	});
+	connection.RegisterHandler<EventActivePacket>("eva", [this] (EventActivePacket& p) {
+		if(!do_event_sync)
+			return;
+		
+		Game_Event* ev = Game_Map::GetEvent(p.id);
+		if (ev == nullptr)
+			return;
+		ev->SetActive(p.active_bin == 1);
+	});
 }
 
 using namespace Messages::C2S;
@@ -509,6 +604,8 @@ void Game_Multiplayer::Connect(int map_id, bool room_switch) {
 
 void Game_Multiplayer::Initialize() {
 	session_connected = false;
+	has_event_authority = false;
+	do_event_sync = false;
 
 	auto scene_map = Scene::Find(Scene::SceneType::Map);
 	if (scene_map && (!players.empty() || !dc_players.empty())) {
@@ -595,42 +692,56 @@ void Game_Multiplayer::MainPlayerFlashed(int r, int g, int b, int p, int f) {
 // npc-sync
 // TODO: event flashing
 void Game_Multiplayer::EventMoved(int ev_id, int x, int y) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventMovePacket>(ev_id, x, y);
 }
 
 void Game_Multiplayer::EventFacingChanged(int ev_id, int dir) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventFacingPacket>(ev_id, dir);
 }
 
 void Game_Multiplayer::EventChangedMoveSpeed(int ev_id, int spd) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventSpeedPacket>(ev_id, spd);
 }
 
 void Game_Multiplayer::EventChangedSpriteGraphic(int ev_id, std::string name, int index) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventSpritePacket>(ev_id, name, index);
 }
 
 void Game_Multiplayer::EventChangedSpriteHidden(int ev_id, bool hidden) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventHiddenPacket>(ev_id, hidden);
 }
 
 void Game_Multiplayer::EventChangedTransparency(int ev_id, int transparency) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventTransparencyPacket>(ev_id, transparency);
 }
 
 void Game_Multiplayer::EventActiveChanged(int ev_id, bool active) {
+	if(!has_event_authority || !do_event_sync)
+		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
 		return;
 	connection.SendPacketAsync<EventActivePacket>(ev_id, active);

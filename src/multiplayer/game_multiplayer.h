@@ -107,6 +107,8 @@ public:
 	int cu_precipitation;
 
 	// npc-sync
+	bool has_event_authority;
+	bool do_event_sync;
 	std::unordered_map<int, std::deque<std::pair<int, int>>> event_mvqs;
 	void EventMoved(int ev_id, int x, int y);
 	void EventFacingChanged(int ev_id, int dir);

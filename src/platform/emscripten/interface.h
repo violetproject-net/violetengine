@@ -48,6 +48,8 @@ public:
 
 	static void PreloadFile(std::string dir, std::string path, bool graphic);
 	static void SaveConfig();
+
+	static void SetEventSyncEnabled(bool enabled);
 };
 
 class Emscripten_Interface_Private {

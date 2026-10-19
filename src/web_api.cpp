@@ -113,6 +113,12 @@ bool Web_API::ShouldSyncGameEvent(int ev_id) {
 	return result == 1;
 }
 
+void Web_API::EventAuthorityUpdated(int authority_host_id) {
+	EM_ASM({
+		onEventAuthorityUpdated(id);
+	}, authority_host_id);
+}
+
 void Web_API::OnRequestFile(std::string_view path) {
 	EM_ASM({
 		onRequestFile(UTF8ToString($0, $1));

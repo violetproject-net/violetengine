@@ -108,14 +108,14 @@ bool Web_API::ShouldConnectPlayer(std::string_view uuid) {
 
 bool Web_API::ShouldSyncGameEvent(int ev_id) {
 	int result = EM_ASM_INT({
-		return shouldSyncGameEvent(ev_id);
+		return shouldSyncGameEvent($0);
 	}, ev_id);
 	return result == 1;
 }
 
 void Web_API::EventAuthorityUpdated(int authority_host_id) {
 	EM_ASM({
-		onEventAuthorityUpdated(id);
+		onEventAuthorityUpdated($0);
 	}, authority_host_id);
 }
 

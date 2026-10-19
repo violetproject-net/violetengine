@@ -495,7 +495,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventMovePacket>("evm", [this] (EventMovePacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -506,7 +506,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventJumpPacket>("evjmp", [this] (EventJumpPacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -520,7 +520,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventFacingPacket>("evf", [this] (EventFacingPacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -530,7 +530,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventSpeedPacket>("evspd", [this] (EventSpeedPacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -540,7 +540,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventSpritePacket>("evspr", [this] (EventSpritePacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -550,7 +550,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventTransparencyPacket>("evtr", [this] (EventTransparencyPacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -560,7 +560,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventHiddenPacket>("evh", [this] (EventHiddenPacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -569,7 +569,7 @@ void Game_Multiplayer::InitConnection() {
 	connection.RegisterHandler<EventActivePacket>("eva", [this] (EventActivePacket& p) {
 		if(!do_event_sync)
 			return;
-		
+
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
@@ -605,7 +605,7 @@ void Game_Multiplayer::Connect(int map_id, bool room_switch) {
 void Game_Multiplayer::Initialize() {
 	session_connected = false;
 	has_event_authority = false;
-	do_event_sync = false;
+	//do_event_sync = false;
 
 	auto scene_map = Scene::Find(Scene::SceneType::Map);
 	if (scene_map && (!players.empty() || !dc_players.empty())) {

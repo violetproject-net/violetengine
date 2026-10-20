@@ -720,71 +720,78 @@ void Game_Multiplayer::MainPlayerFlashed(int r, int g, int b, int p, int f) {
 // npc-sync
 // TODO: event flashing
 void Game_Multiplayer::EventMoved(int ev_id, int x, int y) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventMovePacket>(ev_id, x, y);
 }
 
 void Game_Multiplayer::EventFacingChanged(int ev_id, int dir) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventFacingPacket>(ev_id, dir);
 }
 
 void Game_Multiplayer::EventChangedMoveSpeed(int ev_id, int spd) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventSpeedPacket>(ev_id, spd);
 }
 
 void Game_Multiplayer::EventChangedSpriteGraphic(int ev_id, std::string name, int index) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventSpritePacket>(ev_id, name, index);
 }
 
 void Game_Multiplayer::EventChangedSpriteHidden(int ev_id, bool hidden) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventHiddenPacket>(ev_id, hidden);
 }
 
 void Game_Multiplayer::EventChangedTransparency(int ev_id, int transparency) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventTransparencyPacket>(ev_id, transparency);
 }
 
 void Game_Multiplayer::EventActiveChanged(int ev_id, bool active) {
+	Game_Event* ev = Game_Map::GetEvent(ev_id);
 	if(Main_Data::game_player->IsPendingTeleport())
 		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
-	if(!Web_API::ShouldSyncGameEvent(ev_id))
+	if(!Web_API::ShouldSyncGameEvent(ev_id, ev->GetName()))
 		return;
 	connection.SendPacketAsync<EventActivePacket>(ev_id, active);
 }

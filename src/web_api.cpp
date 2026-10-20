@@ -106,10 +106,10 @@ bool Web_API::ShouldConnectPlayer(std::string_view uuid) {
 	return result == 1;
 }
 
-bool Web_API::ShouldSyncGameEvent(int ev_id) {
+bool Web_API::ShouldSyncGameEvent(int ev_id, std::string_view ev_name) {
 	int result = EM_ASM_INT({
-		return shouldSyncGameEvent($0);
-	}, ev_id);
+		return shouldSyncGameEvent($0, UTF8ToString($1, $2));
+	}, ev_id, ev_name.data(), ev_name.size());
 	return result == 1;
 }
 

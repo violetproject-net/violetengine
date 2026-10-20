@@ -720,6 +720,8 @@ void Game_Multiplayer::MainPlayerFlashed(int r, int g, int b, int p, int f) {
 // npc-sync
 // TODO: event flashing
 void Game_Multiplayer::EventMoved(int ev_id, int x, int y) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
@@ -728,6 +730,8 @@ void Game_Multiplayer::EventMoved(int ev_id, int x, int y) {
 }
 
 void Game_Multiplayer::EventFacingChanged(int ev_id, int dir) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
@@ -736,6 +740,8 @@ void Game_Multiplayer::EventFacingChanged(int ev_id, int dir) {
 }
 
 void Game_Multiplayer::EventChangedMoveSpeed(int ev_id, int spd) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
@@ -744,6 +750,8 @@ void Game_Multiplayer::EventChangedMoveSpeed(int ev_id, int spd) {
 }
 
 void Game_Multiplayer::EventChangedSpriteGraphic(int ev_id, std::string name, int index) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
@@ -752,6 +760,8 @@ void Game_Multiplayer::EventChangedSpriteGraphic(int ev_id, std::string name, in
 }
 
 void Game_Multiplayer::EventChangedSpriteHidden(int ev_id, bool hidden) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
@@ -760,6 +770,8 @@ void Game_Multiplayer::EventChangedSpriteHidden(int ev_id, bool hidden) {
 }
 
 void Game_Multiplayer::EventChangedTransparency(int ev_id, int transparency) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))
@@ -768,6 +780,8 @@ void Game_Multiplayer::EventChangedTransparency(int ev_id, int transparency) {
 }
 
 void Game_Multiplayer::EventActiveChanged(int ev_id, bool active) {
+	if(Main_Data::game_player->IsPendingTeleport())
+		return;
 	if(!has_event_authority || !do_event_sync)
 		return;
 	if(!Web_API::ShouldSyncGameEvent(ev_id))

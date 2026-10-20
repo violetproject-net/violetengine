@@ -730,7 +730,7 @@ namespace C2S {
 	public:
 		EventMovePacket(int _ev_id, int _x, int _y) : C2SPacket("evm"),
 			ev_id(_ev_id), x(_x), y(_y) {}
-		std::string ToBytes() const override { return Build(x, y); }
+		std::string ToBytes() const override { return Build(ev_id, x, y); }
 	protected:
 		int ev_id, x, y;
 	};
@@ -739,7 +739,7 @@ namespace C2S {
 	public:
 		EventTeleportPacket(int _ev_id, int _x, int _y) : C2SPacket("evtp"),
 			ev_id(_ev_id), x(_x), y(_y) {}
-		std::string ToBytes() const override { return Build(x, y); }
+		std::string ToBytes() const override { return Build(ev_id, x, y); }
 	protected:
 		int ev_id, x, y;
 	};
@@ -748,7 +748,7 @@ namespace C2S {
 	public:
 		EventJumpPacket(int _ev_id, int _x, int _y) : C2SPacket("evjmp"),
 			x(_x), y(_y) {}
-		std::string ToBytes() const override { return Build(x, y); }
+		std::string ToBytes() const override { return Build(ev_id, x, y); }
 	protected:
 		int ev_id, x, y;
 	};
@@ -757,7 +757,7 @@ namespace C2S {
 	public:
 		EventFacingPacket(int _ev_id, int _d) : C2SPacket("evf"), 
 			ev_id(_ev_id), d(_d) {}
-		std::string ToBytes() const override { return Build(d); }
+		std::string ToBytes() const override { return Build(ev_id, d); }
 	protected:
 		int ev_id, d;
 	};
@@ -766,7 +766,7 @@ namespace C2S {
 	public:
 		EventSpeedPacket(int _ev_id, int _spd) : C2SPacket("evspd"), 
 			ev_id(_ev_id), spd(_spd) {}
-		std::string ToBytes() const override { return Build(spd); }
+		std::string ToBytes() const override { return Build(ev_id, spd); }
 	protected:
 		int ev_id, spd;
 	};
@@ -775,7 +775,7 @@ namespace C2S {
 	public:
 		EventSpritePacket(int _ev_id, std::string _n, int _i) : C2SPacket("evspr"),
 			ev_id(_ev_id), name(_n), index(_i) {}
-		std::string ToBytes() const override { return Build(name, index); }
+		std::string ToBytes() const override { return Build(ev_id, name, index); }
 	protected:
 		int ev_id;
 		std::string name;
@@ -786,7 +786,7 @@ namespace C2S {
 	public:
 		EventTransparencyPacket(int _ev_id, int _transparency) : C2SPacket("evtr"),
 			ev_id(_ev_id), transparency(_transparency) {}
-		std::string ToBytes() const override { return Build(transparency); }
+		std::string ToBytes() const override { return Build(ev_id, transparency); }
 	protected:
 		int ev_id, transparency;
 	};
@@ -795,7 +795,7 @@ namespace C2S {
 	public:
 		EventHiddenPacket(int _ev_id, int _hidden_bin) : C2SPacket("evh"),
 			ev_id(_ev_id), hidden_bin(_hidden_bin) {}
-		std::string ToBytes() const override { return Build(hidden_bin); }
+		std::string ToBytes() const override { return Build(ev_id, hidden_bin); }
 	protected:
 		int ev_id, hidden_bin;
 	};
@@ -804,7 +804,7 @@ namespace C2S {
 	public:
 		EventActivePacket(int _ev_id, int _active_bin) : C2SPacket("eva"),
 			ev_id(_ev_id), active_bin(_active_bin) {}
-		std::string ToBytes() const override { return Build(active_bin); }
+		std::string ToBytes() const override { return Build(ev_id, active_bin); }
 	protected:
 		int ev_id, active_bin;
 	};

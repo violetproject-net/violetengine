@@ -228,10 +228,6 @@ void Game_Character::UpdateMoveRoute(int32_t& current_index, const lcf::rpg::Mov
 		return;
 	}
 
-	if (_type == Event && GMI().do_event_sync && !GMI().has_event_authority) {
-		return;
-	}
-
 	const auto num_commands = static_cast<int>(current_route.move_commands.size());
 	// Invalid index could occur from a corrupted save game.
 	// Player, Vehicle, and Event all check for and fix this, but we still assert here in

@@ -28,6 +28,7 @@
 #include <lcf/rpg/eventpage.h>
 #include <lcf/rpg/savemapeventbase.h>
 #include "drawable.h"
+#include "output.h"
 #include "utils.h"
 #include "multiplayer/game_multiplayer.h"
 
@@ -926,6 +927,13 @@ public:
 	static constexpr int GetDxFromDirection(int dir);
 	static constexpr int GetDyFromDirection(int dir);
 
+	// ANCHOR - Violetproject changes
+	// limbillion: Added for NPC sync to directly set and access certain fields
+	lcf::rpg::SaveMapEventBase* GetData() const;
+	virtual int GetEventId() const {
+		Output::WarningStr("Game_Character::GetEventId() not implemented! This shouldn't happen!");
+		return -1; 
+	};
 protected:
 	explicit Game_Character(Type type, lcf::rpg::SaveMapEventBase* d);
 	/** Check for and fix incorrect data after loading save game */
@@ -992,6 +1000,11 @@ inline const lcf::rpg::SaveMapEventBase* Game_Character::data() const {
 	return _data;
 }
 
+// limbillion: Added for NPC sync
+inline lcf::rpg::SaveMapEventBase* Game_Character::GetData() const {
+	return _data;
+}
+
 inline Game_Character::Type Game_Character::GetType() const {
 	return _type;
 }
@@ -1033,6 +1046,11 @@ inline int Game_Character::GetFacing() const {
 }
 
 inline void Game_Character::SetFacing(int new_facing) {
+	if (GetType() == Event && new_facing != data()->facing && !IsMoving()) {
+		if (GMI().do_event_sync && GMI().has_event_authority) {
+			GMI().EventFacingChanged(GetEventId(), new_facing);
+		}
+	}
 	if (GetType() == Player && new_facing != data()->facing && !IsMoving()) {
 		GMI().MainPlayerFacingChanged(new_facing);
 	}
@@ -1064,6 +1082,11 @@ inline int Game_Character::GetMoveSpeed() const {
 }
 
 inline void Game_Character::SetMoveSpeed(int speed) {
+	if (GetType() == Event && data()->move_speed != speed) {
+		if (GMI().do_event_sync && GMI().has_event_authority) {
+			GMI().EventChangedMoveSpeed(GetEventId(), speed);
+		}
+	}
 	if (GetType() == Player && data()->move_speed != speed) {
 		GMI().MainPlayerChangedMoveSpeed(speed);
 	}
@@ -1123,6 +1146,11 @@ inline const std::string& Game_Character::GetSpriteName() const {
 }
 
 inline void Game_Character::SetSpriteGraphic(std::string sprite_name, int index) {
+	if (GetType() == Event) {
+		if (GMI().do_event_sync && GMI().has_event_authority) {
+			GMI().EventChangedSpriteGraphic(GetEventId(), sprite_name, index);
+		}
+	}
 	if (GetType() == Player) {
 		GMI().MainPlayerChangedSpriteGraphic(sprite_name, index);
 	}
@@ -1295,6 +1323,11 @@ inline int Game_Character::GetTransparency() const {
 }
 
 inline void Game_Character::SetTransparency(int value) {
+	if (GetType() == Event && data()->transparency != value) {
+		if (GMI().do_event_sync && GMI().has_event_authority) {
+			GMI().EventChangedTransparency(GetEventId(), value);
+		}
+	}
 	if (GetType() == Player && data()->transparency != value) {
 		GMI().MainPlayerChangedTransparency(Utils::Clamp(value, 0, 7));
 	}
@@ -1322,6 +1355,11 @@ inline bool Game_Character::IsActive() const {
 }
 
 inline void Game_Character::SetActive(bool active) {
+	if (GetType() == Event) {
+		if (GMI().do_event_sync && GMI().has_event_authority) {
+			GMI().EventActiveChanged(GetEventId(), active);
+		}
+	}
 	data()->active = active;
 }
 
@@ -1334,6 +1372,11 @@ inline int Game_Character::GetTileId() const {
 }
 
 inline void Game_Character::SetSpriteHidden(bool hidden) {
+	if (GetType() == Event) {
+		if (GMI().do_event_sync && GMI().has_event_authority) {
+			GMI().EventChangedSpriteHidden(GetEventId(), hidden);
+		}
+	}
 	data()->sprite_hidden = hidden;
 }
 

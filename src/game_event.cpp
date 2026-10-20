@@ -19,7 +19,6 @@
 #include "game_event.h"
 #include "game_actor.h"
 #include "game_actors.h"
-#include "game_character.h"
 #include "game_map.h"
 #include "game_message.h"
 #include "game_party.h"
@@ -299,6 +298,10 @@ int Game_Event::GetId() const {
 	return data()->ID;
 }
 
+int Game_Event::GetEventId() const {
+	return Game_Event::GetId();
+}
+
 std::string_view Game_Event::GetName() const {
 	return event->name;
 }
@@ -400,38 +403,7 @@ bool Game_Event::Move(int dir) {
 		CheckCollisonOnMoveFailure();
 		return false;
 	}
-	GMI().EventMoved(GetId(), GetX(), GetY());
 	return true;
-}
-
-void Game_Event::SetFacing(int new_facing) {
-	Game_Character::SetFacing(new_facing);
-	GMI().EventFacingChanged(GetId(), new_facing);
-}
-
-void Game_Event::SetMoveSpeed(int speed) {
-	Game_Character::SetMoveSpeed(speed);
-	GMI().EventChangedMoveSpeed(GetId(), speed);
-}
-
-void Game_Event::SetSpriteGraphic(std::string sprite_name, int index) {
-	Game_Character::SetSpriteGraphic(sprite_name, index);
-	GMI().EventChangedSpriteGraphic(GetId(), sprite_name, index);
-}
-
-void Game_Event::SetTransparency(int value) {
-	Game_Character::SetTransparency(value);
-	GMI().EventChangedTransparency(GetId(), value);
-}
-
-void Game_Event::SetSpriteHidden(bool hidden) {
-	Game_Character::SetSpriteHidden(hidden);
-	GMI().EventChangedSpriteHidden(GetId(), hidden);
-}
-
-void Game_Event::SetActive(bool active) {
-	Game_Character::SetActive(active);
-	GMI().EventActiveChanged(GetId(), active);
 }
 
 void Game_Event::UpdateNextMovementAction() {
@@ -448,10 +420,6 @@ void Game_Event::UpdateNextMovementAction() {
 	}
 
 	CheckEventCollision();
-
-	if(GMI().do_event_sync && !GMI().has_event_authority) {
-		return;
-	}
 
 	if (!page
 			|| IsPaused()

@@ -18,6 +18,7 @@
 // Headers
 #include "audio.h"
 #include "game_character.h"
+#include "game_event.h"
 #include "game_map.h"
 #include "game_player.h"
 #include "game_switches.h"
@@ -487,6 +488,10 @@ bool Game_Character::Move(int dir) {
 		return true;
 	}
 
+	if(_type == Event && GMI().do_event_sync && !GMI().has_event_authority) {
+		return true;
+	}
+
 	bool move_success = false;
 
 	SetDirection(dir);
@@ -520,6 +525,10 @@ bool Game_Character::Move(int dir) {
 
 	if (_type == Player) {
 		GMI().MainPlayerMoved(dir);
+	}
+
+	if (_type == Event && GMI().do_event_sync) {
+		GMI().EventMoved(( (Game_Event*)this )->GetId(), new_x, new_y);
 	}
 	
 	return true;

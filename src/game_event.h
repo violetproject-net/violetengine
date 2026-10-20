@@ -58,13 +58,6 @@ public:
 	/** @{ */
 	Drawable::Z_t GetScreenZ(int x_offset, int y_offset) const override;
 	bool Move(int dir) override;
-	// npc-sync
-	void SetFacing(int new_facing);
-	void SetMoveSpeed(int speed);
-	void SetSpriteGraphic(std::string sprite_name, int index);
-	void SetTransparency(int value);
-	void SetSpriteHidden(bool hidden);
-	void SetActive(bool active);
 	void UpdateNextMovementAction() override;
 	bool IsVisible() const override;
 	/** @} */
@@ -80,6 +73,14 @@ public:
 	 * @return event ID.
 	 */
 	int GetId() const;
+
+	/**
+	 * Gets event ID.
+	 * Used for NPC sync in the multiplayer engine
+	 *
+	 * @return event ID.
+	 */
+	int GetEventId() const override;
 
 	/**
 	 * Gets event name.

@@ -82,12 +82,12 @@ void Game_Multiplayer::SpawnOtherPlayer(int id) {
 
 // this assumes that the player is stopped
 // return true if player moves normally, false if players teleports
-static bool MoveCharacterToPos(Game_Character& character, int x, int y, bool instant) {
-	if (!character.IsStopping()) {
-		Output::Error("MovePlayerToPos unexpected error: the character is busy being animated");
+static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
+	if (!player.IsStopping()) {
+		Output::Error("MovePlayerToPos unexpected error: the player is busy being animated");
 	}
-	int dx = x - character.GetX();
-	int dy = y - character.GetY();
+	int dx = x - player.GetX();
+	int dy = y - player.GetY();
 	int adx = abs(dx);
 	int ady = abs(dy);
 	if (Game_Map::LoopHorizontal() && adx == Game_Map::GetTilesX() - 1) {
@@ -98,9 +98,9 @@ static bool MoveCharacterToPos(Game_Character& character, int x, int y, bool ins
 		dy = dy > 0 ? -1 : 1;
 		ady = 1;
 	}
-	if (adx > 1 || ady > 1 || (dx == 0 && dy == 0) || instant) {
-		character.SetX(x);
-		character.SetY(y);
+	if (adx > 1 || ady > 1 || (dx == 0 && dy == 0) || !player.IsMultiplayerVisible()) {
+		player.SetX(x);
+		player.SetY(y);
 		return false;
 	}
 	using D = Game_Character::Direction;
@@ -109,16 +109,8 @@ static bool MoveCharacterToPos(Game_Character& character, int x, int y, bool ins
 		{D::Left,     0,       D::Right},
 		{D::DownLeft, D::Down, D::DownRight},
 	};
-	character.Move(dir[dy+1][dx+1]);
+	player.Move(dir[dy+1][dx+1]);
 	return true;
-}
-
-static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
-	return MoveCharacterToPos(player, x, y, !player.IsMultiplayerVisible());
-}
-
-static bool MoveEventToPos(Game_Event& event, int x, int y) {
-	return MoveCharacterToPos(event, x, y, false);
 }
 
 void Game_Multiplayer::ResetRepeatingFlash() {
@@ -496,9 +488,6 @@ void Game_Multiplayer::InitConnection() {
 		if(!do_event_sync)
 			return;
 
-		Game_Event* ev = Game_Map::GetEvent(p.id);
-		if (ev == nullptr)
-			return;
 		int x = Utils::Clamp(p.x, 0, Game_Map::GetTilesX() - 1);
 		int y = Utils::Clamp(p.y, 0, Game_Map::GetTilesY() - 1);
 		event_mvqs[p.id].emplace_back(x, y);
@@ -510,11 +499,12 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
+		Game_Character* ch = (Game_Character*)ev;
 		int x = Utils::Clamp(p.x, 0, Game_Map::GetTilesX() - 1);
 		int y = Utils::Clamp(p.y, 0, Game_Map::GetTilesY() - 1);
-		auto rc = ev->Jump(x, y);
+		auto rc = ch->Jump(x, y);
 		if (rc) {
-			ev->SetMaxStopCount(ev->GetMaxStopCountForStep(ev->GetMoveFrequency()));
+			ch->SetMaxStopCount(ch->GetMaxStopCountForStep(ch->GetMoveFrequency()));
 		}
 	});
 	connection.RegisterHandler<EventFacingPacket>("evf", [this] (EventFacingPacket& p) {
@@ -524,8 +514,9 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
+		Game_Character* ch = (Game_Character*)ev;
 		int facing = Utils::Clamp(p.facing, 0, 3);
-		ev->SetFacing(facing);
+		ch->GetData()->facing = facing;
 	});
 	connection.RegisterHandler<EventSpeedPacket>("evspd", [this] (EventSpeedPacket& p) {
 		if(!do_event_sync)
@@ -534,8 +525,9 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
+		Game_Character* ch = (Game_Character*)ev;
 		int speed = Utils::Clamp(p.speed, 1, 6);
-		ev->SetMoveSpeed(speed);
+		ch->GetData()->move_speed = speed;
 	});
 	connection.RegisterHandler<EventSpritePacket>("evspr", [this] (EventSpritePacket& p) {
 		if(!do_event_sync)
@@ -544,8 +536,10 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
+		Game_Character* ch = (Game_Character*)ev;
 		int idx = Utils::Clamp(p.index, 0, 7);
-		ev->SetSpriteGraphic(std::string(p.name), idx);
+		ch->GetData()->sprite_name = std::move(p.name);
+		ch->GetData()->sprite_id = idx;
 	});
 	connection.RegisterHandler<EventTransparencyPacket>("evtr", [this] (EventTransparencyPacket& p) {
 		if(!do_event_sync)
@@ -554,8 +548,9 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
+		Game_Character* ch = (Game_Character*)ev;
 		int transparency = Utils::Clamp(p.transparency, 0, 7);
-		ev->SetTransparency(transparency);
+		ch->GetData()->transparency = transparency;
 	});
 	connection.RegisterHandler<EventHiddenPacket>("evh", [this] (EventHiddenPacket& p) {
 		if(!do_event_sync)
@@ -564,7 +559,8 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
-		ev->SetSpriteHidden(p.hidden_bin == 1);
+		Game_Character* ch = (Game_Character*)ev;
+		ch->GetData()->sprite_hidden = p.hidden_bin == 1;
 	});
 	connection.RegisterHandler<EventActivePacket>("eva", [this] (EventActivePacket& p) {
 		if(!do_event_sync)
@@ -573,7 +569,8 @@ void Game_Multiplayer::InitConnection() {
 		Game_Event* ev = Game_Map::GetEvent(p.id);
 		if (ev == nullptr)
 			return;
-		ev->SetActive(p.active_bin == 1);
+		Game_Character* ch = (Game_Character*)ev;
+		ch->GetData()->active = p.active_bin == 1;
 	});
 }
 
@@ -1084,10 +1081,13 @@ void Game_Multiplayer::Update() {
 				);
 			}
 
-			if (!ev_mvq.empty() && ev->IsStopping()) {
+			Game_Character* ch = (Game_Character*)ev;
+			if (!ev_mvq.empty() && ch->IsStopping()) {
 				auto [x, y] = ev_mvq.front();
 
-				MoveEventToPos(*ev, x, y);
+				ch->SetX(x);
+				ch->SetY(y);
+				ch->SetRemainingStep(SCREEN_TILE_SIZE);
 				ev_mvq.pop_front();
 			}
 		}

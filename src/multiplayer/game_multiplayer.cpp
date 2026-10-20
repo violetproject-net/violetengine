@@ -113,6 +113,34 @@ static bool MovePlayerToPos(Game_PlayerOther& player, int x, int y) {
 	return true;
 }
 
+static bool MoveEventToPos(Game_Character& ch, int x, int y) {
+	if (!ch.IsStopping()) {
+		Output::Error("MoveEventToPos unexpected error: the event is busy being animated");
+	}
+	int dx = x - ch.GetX();
+	int dy = y - ch.GetY();
+	if (dx == 0 && dy == 0) {
+		return false;
+	}
+	if (Game_Map::LoopHorizontal() && dx == Game_Map::GetTilesX() - 1) {
+		dx = dx > 0 ? -1 : 1;
+	}
+	if (Game_Map::LoopVertical() && dy == Game_Map::GetTilesY() - 1) {
+		dy = dy > 0 ? -1 : 1;
+	}
+	using D = Game_Character::Direction;
+	constexpr int dir[3][3]{
+		{D::UpLeft,   D::Up,   D::UpRight},
+		{D::Left,     0,       D::Right},
+		{D::DownLeft, D::Down, D::DownRight},
+	};
+	ch.SetDirection(dir[dy+1][dx+1]);
+	ch.SetX(x);
+	ch.SetY(y);
+	ch.SetRemainingStep(SCREEN_TILE_SIZE);
+	return true;
+}
+
 void Game_Multiplayer::ResetRepeatingFlash() {
 	repeating_flash_active = false;
 	flash_this_frame = false;
@@ -1084,10 +1112,7 @@ void Game_Multiplayer::Update() {
 			Game_Character* ch = (Game_Character*)ev;
 			if (!ev_mvq.empty() && ch->IsStopping()) {
 				auto [x, y] = ev_mvq.front();
-
-				ch->SetX(x);
-				ch->SetY(y);
-				ch->SetRemainingStep(SCREEN_TILE_SIZE);
+				MoveEventToPos(*ch, x, y);
 				ev_mvq.pop_front();
 			}
 		}

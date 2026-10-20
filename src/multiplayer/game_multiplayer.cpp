@@ -507,6 +507,9 @@ void Game_Multiplayer::InitConnection() {
 
 	connection.RegisterHandler<EventAuthorityPacket>("evauth", [this] (EventAuthorityPacket& p) {
 		has_event_authority = p.authority_host_id == host_id;
+		if (has_event_authority) {
+			event_mvqs.clear();
+		}
 		Web_API::EventAuthorityUpdated(p.authority_host_id);
 	});
 

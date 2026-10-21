@@ -26,6 +26,7 @@
 #include <unordered_set>
 
 #include "async_handler.h"
+#include "game_character.h"
 #include "options.h"
 #include "system.h"
 #include "game_battle.h"
@@ -59,6 +60,8 @@
 #include "multiplayer/game_multiplayer.h"
 #include "feature.h"
 #include "web_api.h"
+
+#include "game_playerother.h"
 
 namespace {
 	// Intended bad value, Game_Map::Init sets them correctly
@@ -733,6 +736,13 @@ static int GetPassableMask(int old_x, int old_y, int new_x, int new_y) {
 }
 
 static bool WouldCollide(const Game_Character& self, const Game_Character& other, bool self_conflict) {
+	// Limbillion: Ignore through flag for NPC sync on PlayerOther
+	if (other.GetType() == Game_Character::PlayerOther && self.GetType() == Game_Character::Event) {
+		if (!self.GetThrough()) {
+			return true;
+		}
+	}
+
 	if (self.GetThrough() || other.GetThrough()) {
 		return false;
 	}
@@ -921,6 +931,16 @@ bool Game_Map::CheckOrMakeWayEx(const Game_Character& self,
 		auto& player = Main_Data::game_player;
 		if (player->GetVehicleType() == Game_Vehicle::None) {
 			if (CheckOrMakeCollideEvent(*Main_Data::game_player)) {
+				return false;
+			}
+		}
+		// limbillion: Added
+		for (auto const& [_, player] : GMI().players) {
+			if (!player.ch->IsMultiplayerVisible()) {
+				continue;
+			}
+			
+			if (CheckOrMakeCollideEvent(*player.ch)) {
 				return false;
 			}
 		}

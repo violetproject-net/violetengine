@@ -16,9 +16,11 @@
  */
 
 // Headers
+#include "game_playerother.h"
 #include "game_event.h"
 #include "game_actor.h"
 #include "game_actors.h"
+#include "game_character.h"
 #include "game_map.h"
 #include "game_message.h"
 #include "game_party.h"
@@ -34,6 +36,7 @@
 #include "output.h"
 #include <cmath>
 #include <cassert>
+#include <map>
 #include <optional>
 
 Game_Event::Game_Event(int map_id, const lcf::rpg::Event* event) :
@@ -534,15 +537,37 @@ void Game_Event::MoveTypeCycleUpDown() {
 }
 
 void Game_Event::MoveTypeTowardsOrAwayPlayer(bool towards) {
-	int sx = GetScreenX();
-	int sy = GetScreenY();
+	//int sx = GetScreenX();
+	//int sy = GetScreenY();
 
 	constexpr int offset = TILE_SIZE * 2;
 
-	const bool in_sight = (sx >= -offset && sx <= Player::screen_width + offset
-			&& sy >= -offset && sy <= Player::screen_height + offset);
+	// FIXME bring back normal in_sight screen calculation
+
+	/*const bool in_sight = (sx >= -offset && sx <= Player::screen_width + offset
+			&& sy >= -offset && sy <= Player::screen_height + offset);*/
 
 	const auto prev_dir = GetDirection();
+
+	Game_Character* closest_character = &GetPlayer();
+	int closest_distance = std::abs(this->GetDistanceXfromCharacter(*closest_character)) + std::abs(this->GetDistanceYfromCharacter(*closest_character));
+
+	auto& players = GMI().players;
+	for (auto const& [_, player] : players) {
+		if (!player.ch->IsMultiplayerVisible())
+			continue;
+		
+		int distance = std::abs(this->GetDistanceXfromCharacter(*player.ch)) + std::abs(this->GetDistanceYfromCharacter(*player.ch));
+		if (distance < closest_distance) {
+			closest_distance = distance;
+			closest_character = player.ch.get();
+		}
+	}
+
+	// 20 x 15
+	int xd = std::abs(this->GetDistanceXfromCharacter(*closest_character));
+	int yd = std::abs(this->GetDistanceYfromCharacter(*closest_character));
+	const bool in_sight = xd < 10 && yd < 8;
 
 	int dir = 0;
 	if (!in_sight) {
@@ -555,8 +580,8 @@ void Game_Event::MoveTypeTowardsOrAwayPlayer(bool towards) {
 			dir = Rand::GetRandomNumber(0, 3);
 		} else {
 			dir = towards
-				? GetDirectionToCharacter(GetPlayer())
-				: GetDirectionAwayCharacter(GetPlayer());
+				? GetDirectionToCharacter(*closest_character)
+				: GetDirectionAwayCharacter(*closest_character);
 		}
 	}
 

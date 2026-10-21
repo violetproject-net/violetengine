@@ -12,8 +12,9 @@
 #include <lcf/rpg/sound.h>
 #include <utility>
 #include "yno_connection.h"
+#include "playerother.h"
 
-class PlayerOther;
+//class PlayerOther; FIXME
 
 class Game_Multiplayer {
 public:

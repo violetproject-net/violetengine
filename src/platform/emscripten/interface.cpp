@@ -23,6 +23,7 @@
 #include <lcf/lsd/reader.h>
 #include <sstream>
 
+#include "game_config.h"
 #include "scene_settings.h"
 #include "system.h"
 #include "async_handler.h"
@@ -264,6 +265,10 @@ void Emscripten_Interface::PreloadFile(std::string dir, std::string path, bool g
 
 void Emscripten_Interface::SaveConfig() {
 	Scene_Settings::SaveConfig(true);
+}
+
+void Emscripten_Interface::SetVideoScalingMode(int mode) {
+	DisplayUi->SetScalingMode(static_cast<ConfigEnum::ScalingMode>(mode));
 }
 
 // Binding code

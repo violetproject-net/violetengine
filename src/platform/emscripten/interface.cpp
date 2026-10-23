@@ -287,6 +287,7 @@ EMSCRIPTEN_BINDINGS(player_interface) {
 		.class_function("takeScreenshot", &Emscripten_Interface::TakeScreenshot)
 		
 		.class_function("getScreenshot", &Emscripten_Interface::GetScreenshot)
+		.class_function("setVideoScalingMode", &Emscripten_Interface::SetVideoScalingMode)
 		.class_function("getPlayerCoords", &Emscripten_Interface::GetPlayerCoords)
 		.class_function("setLanguage", &Emscripten_Interface::SetLanguage, emscripten::allow_raw_pointers())
 		.class_function("sessionReady", &Emscripten_Interface::SessionReady)

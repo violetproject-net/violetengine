@@ -22,6 +22,7 @@
 
 #ifdef __EMSCRIPTEN__
 #  include <emscripten.h>
+#  include <emscripten/eventloop.h>
 #  include <lcf/reader_util.h>
 #  include <nlohmann/json.hpp>
    using json = nlohmann::json;
@@ -74,19 +75,44 @@ namespace {
 
 #ifdef __EMSCRIPTEN__
 	constexpr size_t ASYNC_MAX_RETRY_COUNT{ 16 };
+	// limbillion: Added
+	// this is a mechanism to retry downloading due to transport failures
+	// (e.g. lost connection, dns, etc.)
+	constexpr size_t ASYNC_MAX_NET_RETRY_COUNT{ 64 };
+	constexpr int ASYNC_RETRY_INITIAL_BACKOFF{ 250 };
+	constexpr int ASYNC_RETRY_MAX_BACKOFF{ 4000 };
 
 	struct async_download_context {
 		std::string url, file, param;
 		std::weak_ptr<FileRequestAsync> obj;
 		size_t count;
+		size_t net_count;
+		int backoff;
 
 		async_download_context(
 			std::string u,
 			std::string f,
 			std::string p,
 			FileRequestAsync* o
-		) : url{ std::move(u) }, file{ std::move(f) }, param{ std::move(p) }, obj{ o->weak_from_this() }, count{} {}
+		) : url{ std::move(u) }, file{ std::move(f) }, param{ std::move(p) }, obj{ o->weak_from_this() }, count{}, net_count{}, backoff{} {}
 	};
+
+	void start_async_wget_with_retry(async_download_context* ctx);
+
+	void retry_timer_fire(void* userData) {
+		auto ctx = static_cast<async_download_context*>(userData);
+		start_async_wget_with_retry(ctx);
+	}
+
+	void schedule_retry(async_download_context* ctx) {
+		if (ctx->backoff <= 0) {
+			ctx->backoff = ASYNC_RETRY_INITIAL_BACKOFF;
+		} else {
+			ctx->backoff = std::min(ctx->backoff * 2, ASYNC_RETRY_MAX_BACKOFF);
+		}
+
+		emscripten_set_timeout(&retry_timer_fire, ctx->backoff, ctx);
+	}
 
 	void download_success_retry(unsigned, void* userData, const char*) {
 		auto ctx = static_cast<async_download_context*>(userData);
@@ -97,28 +123,39 @@ namespace {
 		delete ctx;
 	}
 
-	void start_async_wget_with_retry(async_download_context* ctx);
-
-	void download_failure_retry(unsigned, void* userData, int status) {
-		auto ctx = static_cast<async_download_context*>(userData);
-		++ctx->count;
-		bool flag1 = ctx->count >= ASYNC_MAX_RETRY_COUNT;
-		bool flag2 = status >= 400;
+	void download_failure_retry(unsigned, void* userData, int status) {		auto ctx = static_cast<async_download_context*>(userData);
 		auto sobj = ctx->obj.lock();
 		std::string_view download_path{ (sobj) ? sobj->GetPath() : "(deleted)" };
-		if (flag1 || flag2) {
-			if (flag1)
-				Output::Warning("DL Failure: max retries exceeded: {}", download_path);
-			else if (flag2)
-				Output::Warning("DL Failure: file not available: {}", download_path);
 
-			if (sobj)
-				sobj->DownloadDone(false);
+		// status == 0 is transport/offline.
+		if (status >= 400 && status < 500) {
+			Output::Warning("DL Failure: file not available: {}", download_path);
+			if (sobj) sobj->DownloadDone(false);
 			delete ctx;
 			return;
 		}
-		Output::Debug("DL Failure: {}. Retrying", download_path);
-		start_async_wget_with_retry(ctx);
+
+		size_t limit;
+		if (status >= 400) {
+			// retry normally
+			limit = ASYNC_MAX_RETRY_COUNT;
+			++ctx->count;
+		} else {
+			// transport error
+			limit = ASYNC_MAX_NET_RETRY_COUNT;
+			++ctx->net_count;
+		}
+
+		size_t attempts = (status >= 400) ? ctx->count : ctx->net_count;
+		if (attempts >= limit) {
+			Output::Warning("DL Failure: max retries exceeded: {}", download_path);
+			if (sobj) sobj->DownloadDone(false);
+			delete ctx;
+			return;
+		}
+
+		Output::Debug("DL Failure: {} (status {}). Retrying in {}ms", download_path, status, ctx->backoff);
+		schedule_retry(ctx); // no re-entrant XHR from inside the callback
 	}
 
 	void start_async_wget_with_retry(async_download_context* ctx) {

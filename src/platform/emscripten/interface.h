@@ -45,6 +45,7 @@ public:
 	static void SetNametagMode(int mode);
 	static void SetSessionToken(std::string t);
 	static bool ResetCanvas();
+	static void UpdateSurface();
 
 	static void PreloadFile(std::string dir, std::string path, bool graphic);
 	static void SaveConfig();

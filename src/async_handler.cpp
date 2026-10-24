@@ -123,7 +123,8 @@ namespace {
 		delete ctx;
 	}
 
-	void download_failure_retry(unsigned, void* userData, int status) {		auto ctx = static_cast<async_download_context*>(userData);
+	void download_failure_retry(unsigned, void* userData, int status) {		
+		auto ctx = static_cast<async_download_context*>(userData);
 		auto sobj = ctx->obj.lock();
 		std::string_view download_path{ (sobj) ? sobj->GetPath() : "(deleted)" };
 

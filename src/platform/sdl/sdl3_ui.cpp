@@ -659,7 +659,9 @@ void Sdl3Ui::UpdateDisplay() {
 }
 
 void Sdl3Ui::SetTitle(const std::string &title) {
+#ifndef __EMSCRIPTEN__ // don't do anything under emscripten
 	SDL_SetWindowTitle(sdl_window, title.c_str());
+#endif
 }
 
 bool Sdl3Ui::ShowCursor(bool flag) {
@@ -1002,6 +1004,8 @@ void Sdl3Ui::ProcessFingerEvent(SDL_Event& evnt) {
 void Sdl3Ui::SetAppIcon() {
 #if defined(__MORPHOS__)
 	// do nothing
+#elif defined(__EMSCRIPTEN__)
+	// also do nothing
 #elif defined(_WIN32)
 	HINSTANCE handle = GetModuleHandle(NULL);
 	HICON icon = LoadIcon(handle, MAKEINTRESOURCE(23456));

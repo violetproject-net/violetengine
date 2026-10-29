@@ -737,7 +737,7 @@ static int GetPassableMask(int old_x, int old_y, int new_x, int new_y) {
 
 static bool WouldCollide(const Game_Character& self, const Game_Character& other, bool self_conflict) {
 	// Limbillion: Ignore through flag for NPC sync on PlayerOther
-	if (other.GetType() == Game_Character::PlayerOther && self.GetType() == Game_Character::Event) {
+	if (GMI().do_event_sync && (other.GetType() == Game_Character::PlayerOther && self.GetType() == Game_Character::Event)) {
 		if (!self.GetThrough()) {
 			return true;
 		}

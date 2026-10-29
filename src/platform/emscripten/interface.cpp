@@ -23,6 +23,8 @@
 #include <lcf/lsd/reader.h>
 #include <sstream>
 
+#include "game_config.h"
+#include "graphics.h"
 #include "scene_settings.h"
 #include "system.h"
 #include "async_handler.h"
@@ -254,6 +256,14 @@ bool Emscripten_Interface::ResetCanvas() {
 	return DisplayUi != nullptr;
 }
 
+void Emscripten_Interface::UpdateSurface() {
+	// this is just used to make the canvas not flicker when resizing the chat panel
+	if(DisplayUi == nullptr)
+		return;
+	//Graphics::Draw(*DisplayUi->GetDisplaySurface());
+	DisplayUi->UpdateDisplay();
+}
+
 void Emscripten_Interface::PreloadFile(std::string dir, std::string path, bool graphic) {
 	auto* request = AsyncHandler::RequestFile(dir, path);
 	if (!request->IsReady()) {
@@ -264,6 +274,10 @@ void Emscripten_Interface::PreloadFile(std::string dir, std::string path, bool g
 
 void Emscripten_Interface::SaveConfig() {
 	Scene_Settings::SaveConfig(true);
+}
+
+void Emscripten_Interface::SetVideoScalingMode(int mode) {
+	DisplayUi->SetScalingMode(static_cast<ConfigEnum::ScalingMode>(mode));
 }
 
 void Emscripten_Interface::SetEventSyncEnabled(bool enabled) {
@@ -286,6 +300,7 @@ EMSCRIPTEN_BINDINGS(player_interface) {
 		.class_function("takeScreenshot", &Emscripten_Interface::TakeScreenshot)
 		
 		.class_function("getScreenshot", &Emscripten_Interface::GetScreenshot)
+		.class_function("setVideoScalingMode", &Emscripten_Interface::SetVideoScalingMode)
 		.class_function("getPlayerCoords", &Emscripten_Interface::GetPlayerCoords)
 		.class_function("setLanguage", &Emscripten_Interface::SetLanguage, emscripten::allow_raw_pointers())
 		.class_function("sessionReady", &Emscripten_Interface::SessionReady)
@@ -296,6 +311,7 @@ EMSCRIPTEN_BINDINGS(player_interface) {
 		.class_function("setNametagMode", &Emscripten_Interface::SetNametagMode)
 		.class_function("setSessionToken", &Emscripten_Interface::SetSessionToken, emscripten::allow_raw_pointers())
 		.class_function("resetCanvas", &Emscripten_Interface::ResetCanvas)
+		.class_function("updateSurface", &Emscripten_Interface::UpdateSurface)
 		.class_function("preloadFile", &Emscripten_Interface::PreloadFile, emscripten::allow_raw_pointers())
 		.class_function("saveConfig", &Emscripten_Interface::SaveConfig)
 
